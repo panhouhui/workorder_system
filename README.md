@@ -17,6 +17,11 @@
 - ReportLab（可选，用于直接PDF绘制）
 - SQLite（或其他数据库）
 
+## 注意事项
+  - 在ticket_pdf函数中的"template_path"这个是word文件的路径，需要自己进行设置
+  - 该项目一共有三个文件夹，accounts（管理用户信息）、tickets（工单流程）、workorder_system（主文件夹）
+  - 如果需要实现多人审批，需要修改accounts文件夹下的模型，需要进行表的设计，还需要修改tickets文件夹下的模型，还需要对各自的forms文件进行修改
+
 ## 使用说明
 
 ### 1. 环境准备
