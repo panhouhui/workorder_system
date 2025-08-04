@@ -1,0 +1,30 @@
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>审批工单</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-8">
+    <h1 class="text-2xl font-bold mb-6 text-center">审批工单</h1>
+    <h2 class="text-lg font-semibold mb-4">{{ ticket.title }}</h2>
+    <p class="mb-4 whitespace-pre-wrap">{{ ticket.content }}</p>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-4">
+          <label class="block text-gray-700 font-semibold mb-1">{{ field.label }}</label>
+          {{ field|add_class:"w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+          {% if field.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">提交审批</button>
+    </form>
+  </div>
+</body>
+</html>

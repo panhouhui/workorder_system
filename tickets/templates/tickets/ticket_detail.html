@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>工单详情</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 space-y-6">
+
+    <!-- 标题与工单基本信息 -->
+    <div class="space-y-2">
+      <h1 class="text-3xl font-bold text-gray-800">{{ ticket.title }}</h1>
+      <p class="text-gray-700 whitespace-pre-wrap">{{ ticket.content }}</p>
+      <div class="text-sm text-gray-600 flex flex-wrap gap-4">
+        <span>申请人：<strong>{{ ticket.applicant.username }}</strong></span>
+        <span>审批人：
+          <strong>
+            {% for approver in ticket.approver.all %}
+              {{ approver.username }}{% if not forloop.last %}、{% endif %}
+            {% endfor %}
+          </strong>
+        </span>
+        <span>状态：<strong>{{ ticket.get_status_display }}</strong></span>
+      </div>
+    </div>
+
+    <!-- 审批记录 -->
+    <div>
+      <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">审批记录</h2>
+      <div class="space-y-4 max-h-64 overflow-y-auto bg-gray-50 border border-gray-200 rounded-lg p-4">
+          {% for log in logs %}
+            <div class="border-l-4 pl-4 py-2 rounded-lg
+              {% if '通过' in log.action %}border-green-500 bg-green-50
+              {% elif '驳回' in log.action %}border-red-500 bg-red-50
+              {% else %}border-gray-400 bg-white{% endif %}">
+
+              <p class="text-sm text-gray-700">
+                <strong>{{ log.user.username }}</strong> 于 {{ log.timestamp|date:"Y-m-d H:i" }} 执行：
+                <span class="font-medium">{{ log.action }}</span>
+              </p>
+
+              {% if log.message %}
+                <p class="text-sm text-gray-700 whitespace-pre-wrap -ml-12">
+                  <strong>意见：</strong>{{ log.message }}
+                </p>
+              {% endif %}
+            </div>
+              {% empty %}
+            <p class="text-gray-500 text-sm">暂无审批记录</p>
+          {% endfor %}
+      </div>
+
+
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="flex flex-wrap justify-between items-center pt-4 border-t">
+      <div class="flex space-x-3 mt-2">
+        <a href="{% url 'tickets:ticket_pdf' ticket.pk %}" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded">导出 PDF</a>
+      </div>
+      <a href="{% url 'tickets:ticket_list' %}" class="text-blue-600 mt-2 hover:underline">← 返回工单列表</a>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>首页</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #3a1c71, #d76d77, #ffaf7b);
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-8">
+  <div class="bg-white/20 backdrop-blur-2xl shadow-2xl rounded-3xl p-10 w-full max-w-4xl text-center border border-white/30">
+
+    <h1 class="text-5xl font-extrabold text-white drop-shadow-lg mb-4">
+      欢迎，{{ user.username }}！
+    </h1>
+
+    <p class="text-xl text-indigo-100 mb-10">
+      您的身份：<span class="font-semibold text-white bg-indigo-600/60 px-3 py-1 rounded-xl">{{ user.get_role_display }}</span>
+    </p>
+
+    <div class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-10">
+      <a href="{% url 'tickets:ticket_list' %}" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 font-medium text-lg">
+        查看工单
+      </a>
+      {% if user.is_employee %}
+      <a href="{% url 'tickets:ticket_create' %}" class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 font-medium text-lg">
+        发起工单
+      </a>
+      {% endif %}
+    </div>
+
+    <a href="{% url 'logout' %}" class="text-red-300 hover:text-red-500 font-semibold transition-all duration-200 hover:underline">
+      退出登录
+    </a>
+  </div>
+</body>
+</html>

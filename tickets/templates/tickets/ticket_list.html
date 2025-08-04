@@ -1,0 +1,136 @@
+{% load widget_tweaks %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>工单列表</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-indigo-50 min-h-screen p-8">
+  <div class="max-w-6xl mx-auto">
+    <header class="mb-8 flex justify-between items-center">
+      <h1 class="text-4xl font-extrabold text-indigo-900">工单列表</h1>
+      <a href="{% url 'tickets:ticket_create' %}"
+         class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition font-semibold">
+        新建工单
+      </a>
+    </header>
+
+    {% if tickets %}
+      <div class="space-y-6">
+        {% for ticket in tickets %}
+          <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div class="flex-1 cursor-pointer" onclick="location.href='{% url 'tickets:ticket_detail' ticket.pk %}'">
+              <h2 class="text-2xl font-semibold text-indigo-800 hover:underline">{{ ticket.title }}</h2>
+              <p class="text-gray-600 mt-1">
+                申请人：<span class="font-medium">{{ ticket.applicant.username }}</span> |
+                审批人：
+                {% for approver in ticket.approver.all %}
+                  <span class="font-medium">{{ approver.username }}</span>{% if not forloop.last %}、{% endif %}
+                {% endfor %}
+              </p>
+              <p class="text-gray-700 mt-2 line-clamp-2">{{ ticket.content }}</p>
+
+              <!-- 审批流程展示 -->
+              {% if ticket.approval_records.all %}
+                <div class="mt-3 text-sm text-gray-500">
+                  <strong>审批流程：</strong>
+                  <ul class="list-disc ml-5 space-y-1 mt-1">
+                    {% for record in ticket.approval_records.all %}
+                      <li>
+                        {{ record.approver.username }}：
+                        {% if record.status == 'pending' %}
+                          <span class="text-yellow-600">待审批</span>
+                        {% elif record.status == 'approved' %}
+                          <span class="text-green-600">已通过</span>
+                        {% elif record.status == 'rejected' %}
+                          <span class="text-red-600">已拒绝</span>
+                        {% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mt-4 md:mt-0 text-right flex flex-col items-end space-y-2">
+              {% comment %} 状态按钮：仅显示一个 {% endcomment %}
+              {% with my_record=ticket.approval_records.all|get_record_for_user:user %}
+                {% if my_record and my_record.status == 'pending' %}
+                  <a href="{% url 'tickets:ticket_approve' ticket.pk %}"
+                     class="inline-block text-sm px-3 py-1 rounded-full bg-blue-600 text-white hover:bg-blue-700">
+                    待我审批
+                  </a>
+                {% else %}
+                  <span class="inline-block text-sm px-3 py-1 rounded-full
+                    {% if ticket.status == 'pending' %} bg-yellow-100 text-yellow-800
+                    {% elif ticket.status == 'approved' %} bg-green-100 text-green-800
+                    {% elif ticket.status == 'rejected' %} bg-red-100 text-red-800
+                    {% else %} bg-gray-200 text-gray-700 {% endif %}">
+                    {{ ticket.get_status_display }}
+                  </span>
+                {% endif %}
+              {% endwith %}
+              <time class="text-gray-400 text-xs">{{ ticket.created_at|date:"Y-m-d H:i" }}</time>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-gray-500 text-lg mt-20">暂无工单</p>
+    {% endif %}
+
+  </div>
+
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+  <script>
+      function fetchTicketStatus() {
+        fetch("{% url 'tickets:ticket_status_api' %}")
+          .then(response => response.json())
+          .then(data => {
+            data.tickets.forEach(ticket => {
+              const statusSpan = document.querySelector(`#status-${ticket.id}`);
+              if (statusSpan) {
+                let statusText = "";
+                let statusClass = "";
+
+                switch (ticket.status) {
+                  case 'pending':
+                    statusText = "待审批";
+                    statusClass = "bg-yellow-100 text-yellow-800";
+                    break;
+                  case 'approved':
+                    statusText = "已通过";
+                    statusClass = "bg-green-100 text-green-800";
+                    break;
+                  case 'rejected':
+                    statusText = "已拒绝";
+                    statusClass = "bg-red-100 text-red-800";
+                    break;
+                  default:
+                    statusText = "未知";
+                    statusClass = "bg-gray-200 text-gray-700";
+                }
+
+                statusSpan.className = `inline-block text-sm px-3 py-1 rounded-full ${statusClass}`;
+                statusSpan.textContent = statusText;
+              }
+            });
+          });
+      }
+
+      setInterval(fetchTicketStatus, 5000); // 每5秒轮询一次
+  </script>
+
+</body>
+</html>

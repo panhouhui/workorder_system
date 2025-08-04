@@ -1,0 +1,40 @@
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>用户注册</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+  <div class="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-md transform transition-transform hover:scale-[1.03]">
+    <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-8 tracking-tight">创建你的账户</h2>
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {% for field in form %}
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">{{ field.label }}</label>
+          {{ field|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" }}
+          {% if field.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-300 shadow-md">
+        注册
+      </button>
+    </form>
+    <p class="mt-6 text-center text-gray-700 text-sm">
+      已有账号？
+      <a href="/login/" class="text-indigo-600 font-medium hover:underline">点此登录</a>
+    </p>
+  </div>
+</body>
+</html>
